@@ -1,4 +1,7 @@
 import os
+
+if os.environ.get("RENDER") == "true":
+    print("Running on Render")
 import telebot
 import requests
 import time
@@ -134,4 +137,8 @@ def start(message):
 
 
 print("Bot en ligne...")
-bot.polling(none_stop=True)
+while True:
+    try:
+        bot.polling(none_stop=True, timeout=60)
+    except Exception as e:
+        print("Restart polling:", e)
