@@ -1,20 +1,4 @@
 import os
-from flask import Flask
-from threading import Thread
-
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Bot is alive!"
-
-def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-
-# Lance le serveur dans un thread séparé
-Thread(target=run).start()
-
-# --- TON CODE DE BOT (Telegram/Trading) COMMENCE ICI ---
 import telebot
 import requests
 import time
@@ -120,17 +104,34 @@ def moteur_principal(chat_id):
 @bot.message_handler(commands=['start'])
 def start(message):
     global live_btc_id, live_or_id, live_analyse_id
-    bot.send_message(message.chat.id, "Bienvenu !\nBot Gold Predictor v3 Activé.\nSuivi en cours... 📡")
 
-    # On initialise les IDs des messages AVANT de lancer le moteur
-    live_btc_id = bot.send_message(message.chat.id, "Connexion BTC...").message_id
-    live_or_id = bot.send_message(message.chat.id, "Connexion OR...").message_id
-    live_analyse_id = bot.send_message(message.chat.id, "Calcul mouvements...").message_id
+    chat_id = message.chat.id
 
-    # On utilise un Thread pour ne pas bloquer le bot
-    t = threading.Thread(target=moteur_principal, args=(message.chat.id,))
-    t.daemon = True
-    t.start()
+    bot.send_message(
+        chat_id,
+        "Bienvenu !\nBot Gold Predictor v3 Activé.\nSuivi en cours... 📡"
+    )
+
+    # BTC
+    msg_btc = bot.send_message(chat_id, "Connexion BTC...")
+    live_btc_id = msg_btc.message_id
+
+    # OR
+    msg_or = bot.send_message(chat_id, "Connexion OR...")
+    live_or_id = msg_or.message_id
+
+    # ANALYSE
+    msg_analyse = bot.send_message(chat_id, "Calcul mouvements...")
+    live_analyse_id = msg_analyse.message_id
+
+    # Lancer le moteur sans bloquer le bot
+    thread = threading.Thread(
+        target=moteur_principal,
+        args=(chat_id,)
+    )
+    thread.daemon = True
+    thread.start()
+
 
 print("Bot en ligne...")
 bot.polling(none_stop=True)
