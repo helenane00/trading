@@ -1,5 +1,0 @@
-pyTelegramBotAPI
-requests
-tradingview_ta
-flask
-
